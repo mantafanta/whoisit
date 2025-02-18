@@ -60,8 +60,36 @@ print(results['name'])
 results = whoisit.ip('2404:1234::/32')
 print(results['name'])
 
-results = whoisit.entity('ARIN-CHA-1')
+results = whoisit.entity('ARIN')
 print(results['last_changed_date'])
+```
+
+Basic async examples:
+
+```python
+import whoisit
+import asyncio
+
+async def whoisit_lookups():
+    results = await whoisit.asn_async(1234)
+    print(results['name'])
+    results = await whoisit.domain_async('example.com')
+    print(results['nameservers'])
+    results = await whoisit.ip_async('1.2.3.4')
+    print(results['name'])
+    results = await whoisit.ip_async('1.2.3.0/24')
+    print(results['name'])
+    results = await whoisit.ip_async('2404:1234:1234:1234:1234:1234:1234:1234')
+    print(results['name'])
+    results = await whoisit.ip_async('2404:1234::/32')
+    print(results['name'])
+    results = await whoisit.entity_async('ARIN')
+    print(results['last_changed_date'])
+
+loop = asyncio.get_event_loop()
+loop.run_until_complete(whoisit.bootstrap_async())
+loop.run_until_complete(whoisit_lookups())
+loop.close()
 ```
 
 
@@ -105,6 +133,7 @@ results = whoisit.entity('AS5089-MNT')
 results = whoisit.entity('AS5089-MNT', rir='ripe')
 ```
 
+
 ### Weaken SSL ciphers
 
 Some RDAP servers do not have particularly secure SSL implementations. As RDAP returns
@@ -128,6 +157,38 @@ Note that with `allow_insecure_ssl=True` the upstream RDAP server certificate is
 still validated, it just permits weaker SSL ciphers during the handshake. You should
 only use `allow_insecure_ssl=True` if your request fails with an SSL cipher or
 handshake error first.
+
+
+### Domain lookup subrequests
+
+Many RDAP endpoints for domains supply a related RDAP server run by a registry which
+may contain more information about the domain. `whoisit` by default will attempt to
+make a subrequest to the related RDAP endpoint if available to obtain more detailed
+results. Occasionally, the related RDAP endpoints may fail or return data in an
+invalid format. You can disable related RDAP endpoint subrequests by passing the
+`follow_related=False` argument to `whoisit.domain(...)`. For example (as of 2024-04-30):
+
+```python
+results = whoisit.domain('example.com', follow_related=False)
+```
+
+If you encounter a parsing error when using related RDAP endpoint data you can also
+skip the parsing by using `raw=True` but continue to use related RDAP data. `whoisit`
+will attempt to handle the RDAP data returned but there will be occasions when RDAP
+results change beyond what `whoisit` can parse. When using raw data you will need to
+parse the data yourself.
+
+You can also write a fallback:
+
+```python
+try:
+    results = whoisit.domain('example.com')
+    # Assume an error parsing the related RDAP data occurs here
+except Exception as e:
+    print(f'Failed to look up domain, trying fallback: {e}')
+    results = whoisit.domain('example.com', follow_related=False)
+    # Likely to succeed if the related RDAP data was the issue
+```
 
 
 ## Bootstrapping
@@ -169,6 +230,12 @@ if whoisit.bootstrap_is_older_than(days=3):
     bootstrap_info = whoisit.save_bootstrap_data()  # and save it to upload your cache
 ```
 
+As of `whoisit` version 3.0.0 there is also an optional async interface:
+
+```python
+await whoisit.bootstrap_async()
+```
+
 A reasonable suggested way to handle bootstrapping data would be to use Memcached or
 Redis, for example:
 
@@ -205,6 +272,15 @@ or
 ```python
 whoisit.load_bootstrap_data(bootstrap_info, overrides=True)
 ```
+
+Both `whoisit.save_bootstrap_data()` and `whoisit.load_bootstrap_data(some_data)` also
+support `as_json=True` as a default argument. The default operation is to return bootstrap
+data as a JSON encoded string and load it from a JSON encoded string. If you want to
+serialise the bootstrapping information in some other format you can use set `as_json=False` on
+both `whoisit.save_bootstrap_data(as_json=False)` and
+`whoisit.load_bootstrap_data(some_data, as_json=False)`. These methods will then return and
+load a Python dictionary instead of JSON and you can perform serialisation yourself however
+you need in your application.
 
 **Important**: when using the overrides you may recieve non-standard data, data that
 is not in the same format as officially listed IANA data and you may not recieve a copy
@@ -317,6 +393,7 @@ response = {
 ```python
 # Domain response data includes all shared general response fields above and also:
 response = {
+    'unicode_name': str,     # Domain name in unicode if available
     'nameservers': list,     # List of name servers for the domain as strings
     'status': list,          # List of the domain states as strings
 }
@@ -458,6 +535,12 @@ whoisit.asn(12345, rir='arin', raw=True)
 whoisit.asn(12345, allow_insecure_ssl=True)
 ```
 
+As of `whoisit` version 3.0.0 there is also an optional async interface:
+
+```python
+response = await whoisit.asn_async(12345)
+```
+
 ### `whoisit.domain(domain=str, raw=bool, allow_insecure_ssl=bool)` -> `dict`
 
 Queries a remote RDAP server for information about the specified domain name. The domain
@@ -476,6 +559,11 @@ whoisit.domain('example.com', raw=True)
 whoisit.domain('example.com', allow_insecure_ssl=True)
 ```
 
+As of `whoisit` version 3.0.0 there is also an optional async interface:
+
+```python
+response = await whoisit.domain_async('example.com')
+```
 
 ### `whoisit.ip(ip="1.1.1.1", rir=str, raw=bool, allow_insecure_ssl=bool)` -> `dict`
 
@@ -500,6 +588,12 @@ whoisit.ip(IPv6Network('2001:4860::/32'), rir='arin')
 whoisit.ip('1.1.1.1', allow_insecure_ssl=True)
 ```
 
+As of `whoisit` version 3.0.0 there is also an optional async interface:
+
+```python
+response = await whoisit.ip_async('1.1.1.1')
+```
+
 ### `whoisit.entity(entity=str, rir=str, raw=bool, allow_insecure_ssl=bool)` -> `dict`
 
 Queries a remote RDAP server for information about the specified entity name. The
@@ -515,6 +609,12 @@ whoisit.entity('ZG39-ARIN')
 whoisit.entity('ZG39-ARIN', rir='arin')
 whoisit.entity('ZG39-ARIN', rir='arin', raw=True)
 whoisit.entity('ZG39-ARIN', allow_insecure_ssl=True)
+```
+
+As of `whoisit` version 3.0.0 there is also an optional async interface:
+
+```python
+response = await whoisit.entity_async('ZG39-ARIN')
 ```
 
 

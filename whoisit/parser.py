@@ -5,10 +5,12 @@ from ipaddress import (
     IPv4Network,
     IPv6Network
 )
-from typing import Optional, TypedDict
+from typing import Optional, List, TypedDict
 from dateutil.parser import parse as dateutil_parse
+
 from .errors import BootstrapError, ParseError
 from .logger import get_logger
+
 
 log = get_logger('parser')
 
@@ -21,10 +23,31 @@ def clean(s):
     return s.strip()
 
 
+def clean_address(a):
+    if a is None:
+        a = ''
+    if isinstance(a, list):
+        a = ' '.join(a)
+    if not isinstance(a, str):
+        a = str(a)
+    return a.strip()
+
+
 class VCardArrayDataDict(TypedDict, total=False):
     name: str
     email: str
     tel: str
+    address: List[str]
+
+
+class VCardArrayAddressDataDict(TypedDict, total=False):
+    po_box: str
+    ext_address: str
+    street_address: str
+    locality: str
+    region: str
+    postal_code: str
+    country: str
 
 
 class Parser:
@@ -91,6 +114,16 @@ class Parser:
                 v_card_array_data_dict["email"] = clean(entry_label)
             elif entry_field == 'tel':
                 v_card_array_data_dict["tel"] = clean(entry_label)
+            elif entry_field == 'adr' and isinstance(entry_label, list) and len(entry_label) == 7:
+                v_card_array_data_dict['address'] = VCardArrayAddressDataDict(
+                    po_box=clean_address(entry_label[0]),
+                    ext_address=clean_address(entry_label[1]),
+                    street_address=clean_address(entry_label[2]),
+                    locality=clean_address(entry_label[3]),
+                    region=clean_address(entry_label[4]),
+                    postal_code=clean_address(entry_label[5]),
+                    country=clean_address(entry_label[6])
+                )
 
         return v_card_array_data_dict or None
 
@@ -114,7 +147,10 @@ class Parser:
         self.parsed['terms_of_service_url'] = ''
         self.parsed['copyright_notice'] = ''
         for notice in self.raw_data.get('notices', []):
-            title = clean(notice.get('title', '')).lower()
+            if isinstance(notice, str):
+                title = notice
+            else:
+                title = clean(notice.get('title', '')).lower()
             if title in (
                     'terms of service', 'terms of use', 'terms and conditions'
             ):
@@ -157,15 +193,15 @@ class Parser:
             if action == 'last changed':
                 last_changed_date = event.get('eventDate', '')
                 if last_changed_date:
-                    self.parsed['last_changed_date'] = dateutil_parse(last_changed_date)
+                    self.parsed['last_changed_date'] = dateutil_parse(last_changed_date, fuzzy=True)
             elif action == 'registration':
                 registration_date = event.get('eventDate', '')
                 if registration_date:
-                    self.parsed['registration_date'] = dateutil_parse(registration_date)
+                    self.parsed['registration_date'] = dateutil_parse(registration_date, fuzzy=True)
             elif action == 'expiration':
                 expiration_date = event.get('eventDate', '')
                 if expiration_date:
-                    self.parsed['expiration_date'] = dateutil_parse(expiration_date)
+                    self.parsed['expiration_date'] = dateutil_parse(expiration_date, fuzzy=True)
 
     def extract_self_link(self):
         self.parsed['url'] = ''
@@ -188,6 +224,8 @@ class Parser:
             entities = self.raw_data.get('entities', [])
 
         for entity in entities:
+            if not isinstance(entity, dict):
+                continue
             handle = clean(entity.get('handle', '')).upper()
             url = ''
             for link in entity.get('links', []):
@@ -245,6 +283,14 @@ class ParseAutnum(Parser):
         self.parsed['asn_range'] = None
         start_asn_range = self.raw_data.get('startAutnum', 0)
         end_asn_range = self.raw_data.get('endAutnum', 0)
+        try:
+            start_asn_range = int(start_asn_range)
+        except (ValueError, TypeError):
+            start_asn_range = 0
+        try:
+            end_asn_range = int(end_asn_range)
+        except (ValueError, TypeError):
+            end_asn_range = 0
         if start_asn_range > 0 and end_asn_range > 0:
             self.parsed['asn_range'] = [start_asn_range, end_asn_range]
 
@@ -267,6 +313,7 @@ class ParseDomain(Parser):
 
     def extract_domain_name(self):
         self.parsed['name'] = clean(self.raw_data.get('ldhName', ''))
+        self.parsed['unicode_name'] = clean(self.raw_data.get('unicodeName', ''))
 
     def extract_domain_nameservers(self):
         self.parsed['nameservers'] = []
