@@ -15,6 +15,11 @@ class QueryError(WhoisItError):
         Raised when there are any issues with queries.
     """
 
+    def __init__(self, message, status_code=0, response=''):
+        super().__init__(message)
+        self.status_code = status_code
+        self.response = response
+
 
 class UnsupportedError(WhoisItError):
     """
@@ -28,19 +33,25 @@ class ParseError(WhoisItError):
     """
 
 
-class ResourceDoesNotExist(WhoisItError):
+class ResourceDoesNotExist(QueryError):
     """
         Raised when querying a resource which doesn't exist.
     """
 
 
-class RateLimitedError(WhoisItError):
+class ResourceAccessDeniedError(QueryError):
+    """
+        Raised when querying a resource returns an access denied response.
+    """
+
+
+class RateLimitedError(QueryError):
     """
         Raised when querying a resource and getting a rate limited response.
     """
 
 
-class RemoteServerError(WhoisItError):
+class RemoteServerError(QueryError):
     """
         Raised when querying a resource and getting a remote server error response.
     """

@@ -3,7 +3,9 @@ import json
 from pathlib import Path
 from datetime import datetime
 from ipaddress import IPv4Network, IPv6Network
+
 from dateutil.tz import tzoffset, tzutc
+
 import whoisit
 
 
@@ -56,7 +58,16 @@ class ParserTestCase(unittest.TestCase):
                     'type': 'entity',
                     'whois_server': 'whois.arin.net',
                     'name': 'Cloudflare, Inc.',
-                    'rir': 'arin'
+                    'rir': 'arin',
+                    'address': {
+                        'po_box': '',
+                        'ext_address': '',
+                        'street_address': '',
+                        'locality': '',
+                        'region': '',
+                        'postal_code': '',
+                        'country': '',
+                    }
                 }
             ]
         )
@@ -70,7 +81,16 @@ class ParserTestCase(unittest.TestCase):
                     'name': 'Abuse',
                     'email': 'abuse@cloudflare.com',
                     'tel': '+1-650-319-8930',
-                    'rir': 'arin'
+                    'rir': 'arin',
+                    'address': {
+                        'po_box': '',
+                        'ext_address': '',
+                        'street_address': '',
+                        'locality': '',
+                        'region': '',
+                        'postal_code': '',
+                        'country': '',
+                    }
                 }
             ]
         )
@@ -84,7 +104,16 @@ class ParserTestCase(unittest.TestCase):
                     'name': 'NOC',
                     'email': 'noc@cloudflare.com',
                     'tel': '+1-650-319-8930',
-                    'rir': 'arin'
+                    'rir': 'arin',
+                    'address': {
+                        'po_box': '',
+                        'ext_address': '',
+                        'street_address': '',
+                        'locality': '',
+                        'region': '',
+                        'postal_code': '',
+                        'country': '',
+                    }
                 }
             ]
         )
@@ -98,7 +127,16 @@ class ParserTestCase(unittest.TestCase):
                     'name': 'Admin',
                     'email': 'rir@cloudflare.com',
                     'tel': '+1-650-319-8930',
-                    'rir': 'arin'
+                    'rir': 'arin',
+                    'address': {
+                        'po_box': '',
+                        'ext_address': '',
+                        'street_address': '',
+                        'locality': '',
+                        'region': '',
+                        'postal_code': '',
+                        'country': '',
+                    }
                 }
             ]
         )
@@ -174,7 +212,16 @@ class ParserTestCase(unittest.TestCase):
                     'url': 'https://rdap.norid.no/entity/reg42-NORID',
                     'type': 'entity',
                     'name': 'Domeneshop AS',
-                    'email': 'kundeservice@domeneshop.no'
+                    'email': 'kundeservice@domeneshop.no',
+                    'address': {
+                        'po_box': '',
+                        'ext_address': '',
+                        'street_address': 'Christian Krohgs gate 16',
+                        'locality': 'Oslo',
+                        'region': '',
+                        'postal_code': 'NO-0186',
+                        'country': 'NORWAY',
+                    }
                 }
             ]
         )
@@ -185,7 +232,16 @@ class ParserTestCase(unittest.TestCase):
                     'url': 'https://rdap.norid.no/entity/DH21326R-NORID',
                     'type': 'entity',
                     'name': 'Domeneshop Hostmaster',
-                    'email': 'hostmaster@domeneshop.no'
+                    'email': 'hostmaster@domeneshop.no',
+                    'address': {
+                        'po_box': '',
+                        'ext_address': '',
+                        'street_address': '',
+                        'locality': '',
+                        'region': '',
+                        'postal_code': '',
+                        'country': 'NORWAY',
+                    }
                 }
             ]
         )
@@ -208,7 +264,7 @@ class ParserTestCase(unittest.TestCase):
                 {
                     'handle': '1647',
                     'type': 'entity',
-                    'name': 'Hosting Concepts B.V. d/b/a Registrar.eu',
+                    'name': 'Hosting Concepts B.V. d/b/a Registrar.eu'
                 }
             ]
         )
@@ -253,7 +309,16 @@ class ParserTestCase(unittest.TestCase):
                     'name': 'APNIC RESEARCH',
                     'email': 'research@apnic.net',
                     'tel': '+61-7-3858-3199',
-                    'rir': 'apnic'
+                    'rir': 'apnic',
+                    'address': {
+                        'po_box': '',
+                        'ext_address': '',
+                        'street_address': '',
+                        'locality': '',
+                        'region': '',
+                        'postal_code': '',
+                        'country': '',
+                    }
                 }
             ]
         )
@@ -313,7 +378,16 @@ class ParserTestCase(unittest.TestCase):
                     'name': 'APNIC RESEARCH',
                     'email': 'research@apnic.net',
                     'tel': '+61-7-3858-3199',
-                    'rir': 'apnic'
+                    'rir': 'apnic',
+                    'address': {
+                        'po_box': '',
+                        'ext_address': '',
+                        'street_address': '',
+                        'locality': '',
+                        'region': '',
+                        'postal_code': '',
+                        'country': '',
+                    }
                 }
             ]
         )
@@ -346,7 +420,16 @@ class ParserTestCase(unittest.TestCase):
                     'rir': 'arin',
                     'type': 'entity',
                     'url': 'https://rdap.arin.net/registry/entity/GOGL',
-                    'whois_server': 'whois.arin.net'
+                    'whois_server': 'whois.arin.net',
+                    'address': {
+                        'po_box': '',
+                        'ext_address': '',
+                        'street_address': '',
+                        'locality': '',
+                        'region': '',
+                        'postal_code': '',
+                        'country': '',
+                    }
                 }
             ]
         )
@@ -360,7 +443,16 @@ class ParserTestCase(unittest.TestCase):
                     'type': 'entity',
                     'url': 'https://rdap.arin.net/registry/entity/ZG39-ARIN',
                     'tel': '+1-650-253-0000',
-                    'whois_server': 'whois.arin.net'
+                    'whois_server': 'whois.arin.net',
+                    'address': {
+                        'po_box': '',
+                        'ext_address': '',
+                        'street_address': '',
+                        'locality': '',
+                        'region': '',
+                        'postal_code': '',
+                        'country': '',
+                    }
                 }
             ]
         )
@@ -374,7 +466,16 @@ class ParserTestCase(unittest.TestCase):
                     'type': 'entity',
                     'url': 'https://rdap.arin.net/registry/entity/ZG39-ARIN',
                     'tel': '+1-650-253-0000',
-                    'whois_server': 'whois.arin.net'
+                    'whois_server': 'whois.arin.net',
+                    'address': {
+                        'po_box': '',
+                        'ext_address': '',
+                        'street_address': '',
+                        'locality': '',
+                        'region': '',
+                        'postal_code': '',
+                        'country': '',
+                    }
                 }
             ]
         )
@@ -388,7 +489,16 @@ class ParserTestCase(unittest.TestCase):
                     'name': 'Abuse',
                     'email': 'network-abuse@google.com',
                     'tel': '+1-650-253-0000',
-                    'rir': 'arin'
+                    'rir': 'arin',
+                    'address': {
+                        'po_box': '',
+                        'ext_address': '',
+                        'street_address': '',
+                        'locality': '',
+                        'region': '',
+                        'postal_code': '',
+                        'country': '',
+                    }
                 },
                 {
                     'handle': 'ZG39-ARIN',
@@ -398,7 +508,16 @@ class ParserTestCase(unittest.TestCase):
                     'name': 'Google LLC',
                     'email': 'arin-contact@google.com',
                     'tel': '+1-650-253-0000',
-                    'rir': 'arin'
+                    'rir': 'arin',
+                    'address': {
+                        'po_box': '',
+                        'ext_address': '',
+                        'street_address': '',
+                        'locality': '',
+                        'region': '',
+                        'postal_code': '',
+                        'country': '',
+                    }
                 }
             ]
         )
@@ -430,7 +549,16 @@ class ParserTestCase(unittest.TestCase):
                     'rir': 'arin',
                     'type': 'entity',
                     'url': 'https://rdap.arin.net/registry/entity/GOGL',
-                    'whois_server': 'whois.arin.net'
+                    'whois_server': 'whois.arin.net',
+                    'address': {
+                        'po_box': '',
+                        'ext_address': '',
+                        'street_address': '',
+                        'locality': '',
+                        'region': '',
+                        'postal_code': '',
+                        'country': '',
+                    }
                 }
             ]
         )
@@ -462,7 +590,16 @@ class ParserTestCase(unittest.TestCase):
                     'type': 'entity',
                     'url': 'https://rdap.arin.net/registry/entity/GTS7-ARIN',
                     'tel': '+1-519-254-5115',
-                    'whois_server': 'whois.arin.net'
+                    'whois_server': 'whois.arin.net',
+                    'address': {
+                        'po_box': '',
+                        'ext_address': '',
+                        'street_address': '',
+                        'locality': '',
+                        'region': '',
+                        'postal_code': '',
+                        'country': '',
+                    }
                 }
             ]
         )
